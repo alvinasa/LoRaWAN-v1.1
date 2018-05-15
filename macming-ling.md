@@ -161,5 +161,159 @@ ResetConf命令包含一个单字节有效载荷，由网络服务器所支持�
 
 # 5.4 终端设备发送占空比（DutyCycleReq，DutyCycleAns）
 
+网络协调器使用**DutyCycleReq**命令来限制终端设备的最大聚合传输占空比。聚合传输占空比对应于所有子带上的传输占空比。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| DutyCycleReq Payload | DutyCyclePL |
+
+| Bits | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| DutyCyclePL | RFU | MaxDCycle |
+
+允许的最大终端设备传输占空比为：
+
+_aggrated duty cycle_ = 1/2∧MaxDCycle
+
+**MaxDutyCycle**的有效范围是\[0：15\]。0值对应于“没有占空比限制”，区域法规规定的值除外。
+
+终端设备通过**DutyCycleAns**命令来应答**DutyCycleReq**。**DutyCycleAns** MAC回复不包含任何有效负载。
+
+# 5.5 接收窗口参数（RXParamSetupReq，RXParamSetupAns）
+
+**RXParamSetupReq**命令允许更改每个上行链路之后第二个接收窗口（RX2）的频率和数据速率。该命令还允许对上行链路和RX1时隙下行链路数据速率之间的偏移进行设置。
+
+| Size（bytes） | 1 | 3 |
+| :---: | :---: | :---: |
+| RXParamSetupReq Payload | DLsettings | Frequency |
+
+| Bits | 7 | 6:4 | 3:0 |
+| :---: | :---: | :---: | :---: |
+| DLsettings | RFU | RX1DRoffset | RX2DataRate |
+
+RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量，用于与在第一个接收时隙（RX1）上的终端设备进行通信。默认情况下，该偏移量为0。该偏移量用于考虑某些地区基站的最大功率密度限制，并平衡上行链路和下行链路无线链路余量。
+
+数据速率（RX2**DataRate**）字段按照与**LinkADRReq**命令相同的约定（例如0表示DR0 / 125kHz），使用第二个接收窗口定义下行链路的数据速率。频率（**Frequency**）字段对应于用于第二个接收窗口的信道频率，即频率按照**NewChannelReq**命令中定义的约定进行编码。
+
+**RXParamSetupAns**命令由终端设备用来确认接收**RXParamSetupReq**命令。必须将**RXParamSetupAns**命令添加到所有上行链路的FOpt字段中，直到终端设备收到A类下行链路。这保证即使在存在上行链路包丢失的情况下，网络也始终知道终端设备使用的下行链路参数。
+
+有效载荷包含单个状态字节。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| RXParamSetupAns Payload | Status |
+
+状态（**Status**）位具有以下含义。
+
+| Bits | 7:3 | 2 | 1 | 0 |
+| :---: | :---: | :---: | :---: | :---: |
+| Status bits | RFU | RX1DRoffset ACK | RX2 Data rate ACK | Channel ACK |
+
+|  | Bit = 0 | Bit = 1 |
+| :--- | :--- | :--- |
+| Channel ACK | 请求的频率不被终端设备使用。 | RX2时隙信道已成功设置 |
+| RX2DataRate ACK | 请求的数据速率对于终端设备是未知的。 | RX2时隙数据速率已成功设置 |
+| RX1DRoffset ACK | RX1时隙的上行/下行数据速率偏移量不在允许范围内 | RX1DRoffset已成功设置 |
+
+如果3位中的任何一位等于0，则该命令不成功，并且必须保留先前的参数。
+
+# 5.6 终端设备状态（DevStatusReq，DevStatusAns）
+
+通过**DevStatusReq**命令，网络服务器可以向终端设备请求状态信息。该命令没有有效载荷。如果终端设备收到**DevStatusReq**，它必须用**DevStatusAns**命令响应。
+
+| Size（bytes） | 1 | 1 |
+| :---: | :---: | :---: |
+| DevStatusAns Payload | Battery | Margin |
+
+报告的电池电量（**Battery**）编码如下：
+
+| Battery | Description |
+| :---: | :---: |
+| 0 | 终端设备连接到外部电源。 |
+| 1..254 | 电池电量，最小值为1，最大值为254。 |
+| 255 | 终端设备无法测量电池电量。 |
+
+余量（**Margin**）是以dB为单位的解调信噪比，最近成功接收的**DevStatusReq**命令会取整为最接近的整数值。它是一个6位的有符号整数，最小值为-32，最大值为31。
+
+| Bits | 7:6 | 5:0 |
+| :---: | :---: | :---: |
+| Status | RFU | Margin |
+
+# 5.7 信道的创建/修改（NewChannelReq，NewChannelAns，DlChannelReq，DlChannelAns）
+
+设备运行在定义了固定信道规划的地区不应执行这些MAC命令。这些命令不应该被设备应答。请参阅\[PHY\]了解适用的区域。
+
+**NewChannelReq**命令可用于修改现有双向信道的参数或创建新信道。该命令设置新信道的中心频率和该信道上可用的上行数据速率范围：
+
+| Size（bytes） | 1 | 3 | 1 |
+| :---: | :---: | :---: | :---: |
+| NewChannelReq Payload | ChIndex | Freq | DrRange |
+
+信道索引（**ChIndex**）是正在创建或修改信道的索引。根据所使用的区域和频段，在某些区域（\[PHY\]），LoRaWAN规范强加了默认信道，这些信道必须是所有设备共有的，并且不能由**NewChannelReq**命令修改。如果默认信道数为_N_，信道从0到_N_-1，**ChIndex**的可接受范围是_N_到15.设备必须能够处理至少16个不同的信道定义。在某些地区，设备可能必须存储16个以上的信道定义。
+
+频率（**Freq**）字段是24位无符号整数。以Hz为单位的实际信道频率为100 x **Freq**，其中代表100 MHz频率以下的值保留供将来使用。这允许以100Hz的步长设置100 MHz至1.67 GHz之间任何信道的频率。**Freq**值为0将禁用信道。终端设备必须检查频率是否被无线硬件实际允许，否则返回错误。
+
+数据速率范围（**DrRange**）字段指定该信道允许的上行数据速率范围。该字段分为两个4位索引：
+
+| Bits | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| DrRange | MaxDR | MinDR |
+
+遵循5.3节中定义的约定，最小数据速率（**MinDR**）子字段指定该信道允许的最低上行数据速率。例如，使用欧洲区域参数，0表示DR0 / 125 kHz。类似地，最大数据速率（**MaxDR**）指定最高上行数据速率。例如，DrRange = 0x77意味着通道只允许50 kbps的GFSK，DrRange = 0x50则表示支持DR0 / 125 kHz到DR5 / 125 kHz。
+
+新定义或修改的信道被启用便可立即用于通信。RX1下行链路频率被设置为等于上行链路频率。
+
+终端设备通过发送**NewChannelAns**命令来确认接收到**NewChannelReq**。此消息的有效内容包含以下信息：
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| NewChannelAns Payload | status |
+
+状态（**Status**）位具有以下含义：
+
+| Bits | 7:2 | 1 | 0 |
+| :---: | :---: | :---: | :---: |
+| Status | RFU | Data rate range ok | Channel frequency ok |
+
+|  | Bit = 0 | Bit = 1 |
+| :--- | :--- | :--- |
+| Data rate range ok | 指定的数据速率范围超出了当前为此终端设备定义的数据速率范围 | 数据速率范围与终端设备的可能性兼容 |
+| Channel frequency ok | 设备无法使用该频率 | 设备能够使用这个频率。 |
+
+如果这两个比特中的任何一个等于0，则该命令不成功并且新的信道尚未被创建。
+
+**DlChannelReq**命令允许网络将不同的下行链路频率与RX1时隙相关联。该命令适用于支持**NewChannelReq**命令的所有物理层规范（例如欧盟和中国的物理层，但不适用于美国或澳大利亚）。
+
+该命令设置用于下行链路RX1时隙的中心频率，如下所示：
+
+| Size（bytes） | 1 | 3 |
+| :---: | :---: | :---: |
+| DIChannelReq Payload | ChIndex | Freq |
+
+信道索引（**ChIndex**）是下行链路频率被修改的信道索引。
+
+频率（**Freq**）字段是24位无符号整数。以Hz为单位的实际下行链路频率为100 x **Freq**，其中代表100 MHz以下频率的值保留供将来使用。终端设备必须检查频率是否被无线硬件实际允许，否则返回错误。
+
+终端设备通过发回一个**DlChannelAns**命令来确认接收到**DlChannelReq**。**DlChannelAns**命令应该被添加到所有上行链路的FOpt字段中，直到终端设备收到下行包。这保证即使在存在上行链路包丢失的情况下，网络也始终知道终端设备使用的下行链路频率。
+
+此消息的有效内容包含以下信息：
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| DIChannelAns Payload | Status |
+
+状态（**Status**）位具有以下含义：
+
+| Bits | 7:2 | 1 | 0 |
+| :---: | :---: | :---: | :---: |
+| Status | RFU | 上行频率存在 | 信道频率正常 |
+
+|  | Bit = 0 | Bit = 1 |
+| :--- | :--- | :--- |
+| Channel frequency ok | 设备无法使用该频率 | 设备能够使用这个频率。 |
+| Uplink frequency exists | 没有为该信道定义上行链路频率，只能为已经具有有效上行链路频率的信道设置下行链路频率 | 信道的上行频率是有效的 |
+
+# 5.8 设置TX和RX之间的延迟（RXTimingSetupReq，RXTimingSetupAns）
+
 
 
