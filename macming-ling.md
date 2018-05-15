@@ -29,7 +29,7 @@ MAC命令由接收端应答/确认，与发送保持相同的顺序。每个MAC�
 | 0x07 | _**NewChannelAns**_ | 终端设备 | 响应NewChannelReq命令 |
 | 0x08 | _**RXTimingSetupReq**_ | 网关 | 设置接收时隙的时间 |
 | 0x08 | _**RXTimingSetupAns**_ | 终端设备 | 响应RXTimingSetupReq命令 |
-| 0x09 | _**TxParamSetupReq**_ | 网关 | 根据当地法规，由网络服务器用于设置终端设备的最大允许停留时间和最大EIRP |
+| 0x09 | _**TxParamSetupReq**_ | 网关 | 根据当地法规，由网络服务器用于设置终端设备的最大允许驻留时间和最大EIRP |
 | 0x09 | _**TxParamSetupAns**_ | 终端设备 | 响应TxParamSetupReq命令 |
 | 0x0A | _**DlChannelReq**_ | 网关 | 通过从上行链路频率改变下行链路频率来修改下行RX1无线信道的定义（即创建非对称信道） |
 | 0x0A | _**DlChannelAns**_ | 终端设备 | 响应DlChannelReq命令 |
@@ -314,6 +314,72 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 | Uplink frequency exists | 没有为该信道定义上行链路频率，只能为已经具有有效上行链路频率的信道设置下行链路频率 | 信道的上行频率是有效的 |
 
 # 5.8 设置TX和RX之间的延迟（RXTimingSetupReq，RXTimingSetupAns）
+
+**RXTimingSetupReq**命令允许配置TX上行链路结束和第一个接收时隙打开之间的延迟。第二个接收时隙在第一个接收时隙后一秒打开。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| RXTimingSetupReq Payload | 设置 |
+
+延迟（**Delay**）字段指定延迟。该字段分为两个4位索引：
+
+| Bits | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| Settings | RFU | Del |
+
+延迟以秒表示。**Del **0被映射到1秒。
+
+| Del | Delay \[s\] |
+| :---: | :---: |
+| 0 | 1 |
+| 1 | 1 |
+| 2 | 2 |
+| 3 | 3 |
+| .. | .. |
+| 15 | 15 |
+
+终端设备使用**RXTimingSetupAns**来应答**RXTimingSetupReq**，而无有效载荷。
+
+**RXTimingSetupAns**命令应添加到所有上行链路的FOpt字段中，直到终端设备收到A类下行链路。这保证即使存在上行链路包丢失，网络总是知道终端设备使用的下行链路参数。
+
+# 5.9 终端设备传输参数（TxParamSetupReq，TxParamSetupAns）
+
+该MAC命令需要执行以符合规定在某些监管区域。请参考\[PHY\]。
+
+**TxParamSetupReq**命令可以用于向终端设备通知最大允许驻留时间，即空中包的最大连续传输时间以及允许的最大终端设备有效全向辐射功率（EIRP）。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| TxParamSetupReq payload | EIRP\_DwellTime |
+
+EIRP\_DwellTime字段的结构如下所述：
+
+| Bits | 7:6 | 5 | 4 | 3:0 |
+| :---: | :---: | :---: | :---: | :---: |
+| MaxDwellTime | RFU | DownlinkDwellTime | UplinkDwellTime | MaxEIRP |
+
+按照下表，使用**TxParamSetupReq**命令的位\[0 ... 3\]来编码最大EIRP值。本表中EIRP值的选择方式涵盖了不同区域法规所规定的各种最大EIRP限值。
+
+| Coded Value | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Max EIRP（dBm） | 8 | 10 | 12 | 13 | 14 | 16 | 18 | 20 | 21 | 24 | 26 | 27 | 29 | 30 | 33 | 36 |
+
+最大EIRP对应于设备的无线发射功率的上限。该设备不需要以该功率进行传输，但不得发射比指定的EIRP更高。
+
+4和5位分别定义了最大上行链路和下行链路驻留时间，按照下表进行编码：
+
+| Coded Value | Dwell Time |
+| :---: | :---: |
+| 0 | 不限制 |
+| 1 | 400 ms |
+
+当这个MAC命令被实现时（特定区域），终端设备通过发送**TxParamSetupAns**命令来确认**TxParamSetupReq**命令。**TxParamSetupAns**命令不包含任何有效负载。
+
+当这个MAC命令在不需要的地区使用时，设备不处理它，并且不应该发送确认。
+
+# 5.10 重新指示命令（RekeyInd，RekeyConf
+
+
 
 
 
