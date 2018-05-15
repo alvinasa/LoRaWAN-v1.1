@@ -62,7 +62,104 @@ OTA设备不能执行这个命令。网络服务器应忽略来自OTA设备的**
 
 > 注意：此命令适用于某一时刻可能会中断电源的ABP设备（例如电池更换）。设备可能丢失存储在RAM中的MAC层上下文（除了必须存储在NVM中的帧计数器）。在这种情况下，设备需要一种方法将该情景丢失传达给网络服务器。在未来版本的LoRaWAN协议中，该命令也可用于协商设备和网络服务器之间的某些协议选项。
 
+**ResetInd**命令包含终端设备支持的LoRaWAN版本的次要版本。
 
+| Size（bytes） | 1 |
+| :---: | :---: |
+| ResetInd Payload | Dev LoRaWAN version |
+
+| Size（bytes） | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| Dev LoRaWAN version | RFU | Minor=1 |
+
+次要字段表示终端设备支持的LoRaWAN版本的次要版本。
+
+| Minor version | Minor |
+| :---: | :---: |
+| RFU | 0 |
+| 1（LoRaWAN x.1） | 1 |
+| RFU | 2:15 |
+
+当网络服务器收到**ResetInd**时，它会用**ResetConf**命令作出响应 。
+
+ResetConf命令包含一个单字节有效载荷，由网络服务器所支持的LoRaWAN版本编码，使用与“Dev LoRaWAN version”相同的格式。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| ResetConf Payload | Serv LoRaWAN version |
+
+**ResetConf**携带的服务器版本必须与设备版本相同。任何其他值都是无效的。
+
+如果服务器版本无效，则设备应丢弃**ResetConf**命令并在下一个上行链路帧中重新发送**ResetInd**。
+
+# 5.2 链路检查命令（LinkCheckReq，LinkCheckAns）
+
+使用**LinkCheckReq**命令，终端设备可以验证其与网络的连接。该命令没有有效载荷。
+
+当网络服务器通过一个或多个网关接收到**LinkCheckReq**时，它会使用**LinkCheckAns**命令进行响应。
+
+| Size（bytes） | 1 | 1 |
+| :---: | :---: | :---: |
+| LinkCheckAns Payload | Margin | GwCnt |
+
+解调余量（**Margin**）是一个8位无符号整数，范围为0..254，表示上次成功接收**LinkCheckReq**命令的链路余量（以dB为单位）。值“0”意味着帧在解调层被接收（0dB或无余量），而值“20”例如意味着帧到达网关比解调层多20dB。值“255”被保留。
+
+网关计数（**GwCnt**）是成功接收最后一个**LinkCheckReq**命令的网关数值。
+
+# 5.3 链路ADR命令（LinkADRReq，LinkADRAns）
+
+使用**LinkADRReq**命令，网络服务器请求终端设备执行速率适配。
+
+| Size（bytes） | 1 | 2 | 1 |
+| :---: | :---: | :---: | :---: |
+| LinkADRReq Payload | DataRate\_TXPower | ChMask | Redundancy |
+
+| Bits | \[7:4\] | \[3:0\] |
+| :---: | :---: | :---: |
+| DataRate\_TXPower | DataRate | TXPower |
+
+请求数据速率（**DataRate**）和TX输出功率（**TXPower**）是区域特定的，并按照\[PHY\]中的指示进行编码。命令中指示的TX输出功率将被视为设备可能运行的最大发射功率。终端设备将指定一个比当前能使用的更高发送功率来确认一个命令的成功，在这种情况下，必须尽可能以其最大功率运行。DataRate或TXPower的值为0xF（十进制为15）表示设备必须忽略该字段，并保留当前参数值。信道掩码（**ChMask**）对可用于上行链路接入的信道进行如下编码，对应于LSB的比特0：
+
+| Bit\# | Usable channels |
+| :---: | :---: |
+| 0 | Channel 1 |
+| 1 | Channel 2 |
+| .. | .. |
+| 15 | Channel 16 |
+
+**ChMask**字段中的位置为1意味着如果该信道允许终端设备使用当前的数据速率，则相应的信道可用于上行链路传输。设置为0的位表示应该避开相应的信道。
+
+| Bits | 7 | \[6:4\] | \[3:0\] |
+| :---: | :---: | :---: | :---: |
+| Redundancy bits | RFU | ChMaskCntl | NbTrans |
+
+在冗余位中，**NbTrans**字段是每个上行链路消息的传输数量。这适用于“已确认”和“未确认”的上行链路帧。对应于每帧的单次传输，默认值是1。有效范围是\[1:15\]。如果收到**NbTrans** == 0，终端设备应保持当前的NbTrans值不变。
+
+信道掩码控制（**ChMaskCntl**）字段控制先前定义的ChMask位掩码的说明。它控制ChMask应用的16个通道的块。它也可以用于全局打开或关闭所有使用特定调制的信道。该字段的用法是区域特定的，并在\[PHY\]中定义。
+
+网络服务器可以在单个下行链路消息内包括多个连续的LinkADRReq命令。为了配置终端设备信道掩码，终端设备必须按照下行消息中的顺序来处理所有连续的LinkADRReq消息，并作为单个原子块命令。网络服务器不得在下行消息中包含多个这样的原子块命令。终端设备必须发送一个LinkADRAns命令来接受或拒绝整个ADR原子命令块。如果下行消息携带多个ADR原子命令块，则终端设备只处理第一个命令块，并响应所有其他ADR命令块发送NAck（所有状态位均设置为0的LinkADRAns命令）。设备必须只处理来自相邻ADR命令块中的最后一个LinkADRReq命令的DataRate，TXPower和NbTrans，因为这些设置控制着这些值的终端设备全局状态。按顺序处理连续的ADR命令块中的所有信道掩码控制之后，响应的信道掩码ACK位必须反映对最后通道的接受/拒绝规划。
+
+信道频率是区域特定的，它们在\[PHY\]定义的。终端设备通过**LinkADRAns**命令应答**LinkADRReq**。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| LinkADRAns Payload | Status |
+
+| Bits | \[7:3\] | 2 | 1 | 0 |
+| :---: | :---: | :---: | :---: | :---: |
+| Status bits | RFU | Power ACK | Data rate ACK | Channel mask ACK |
+
+**LinkADRAns**状态位具有以下含义：
+
+|  | Bit = 0 | Bit = 1 |
+| :---: | :--- | :--- |
+| Channel mask ACK | 发送的信道掩码启用尚未定义的信道或者信道掩码要求禁用所有信道。该命令被丢弃，终端设备的状态没有改变。 | 发送的信道掩码已成功解释。所有当前定义的信道状态都是根据掩码设置的。 |
+| Data rate ACK | 所请求的数据速率对于终端设备是未知的，或者不可能由给定的信道掩码（不被任何启用的信道支持）提供。该命令被丢弃，终端设备状态没有改变。 | 数据速率已成功设置或请求的DataRate字段被设置为15，这意味着它被忽略 |
+| Power ACK | 该设备无法以等于或低于要求的功率等级运行。该命令被丢弃，终端设备状态没有改变。 | 该设备能够以等于或低于请求的功率级别运行，或者请求的TXPower字段被设置为15，这意味着它应该被忽略 |
+
+如果这三者中的任何一位等于0，则该命令不成功并且节点保持先前的状态。
+
+# 5.4 终端设备发送占空比（DutyCycleReq，DutyCycleAns）
 
 
 
