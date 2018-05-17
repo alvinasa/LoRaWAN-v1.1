@@ -173,7 +173,7 @@ ResetConf命令包含一个单字节有效载荷，由网络服务器所支持�
 
 允许的最大终端设备传输占空比为：
 
-_aggrated duty cycle_ = 1/2∧MaxDCycle
+_aggrated duty cycle_ = 1/2^MaxDCycle
 
 **MaxDutyCycle**的有效范围是\[0：15\]。0值对应于“没有占空比限制”，区域法规规定的值除外。
 
@@ -377,9 +377,153 @@ EIRP\_DwellTime字段的结构如下所述：
 
 当这个MAC命令在不需要的地区使用时，设备不处理它，并且不应该发送确认。
 
-# 5.10 重新指示命令（RekeyInd，RekeyConf
+# 5.10 重新指示命令（RekeyInd，RekeyConf）
 
+此MAC命令仅适用于在兼容LoRaWAN1.1网络服务器上激活的OTA设备。LoRaWAN1.0服务器不实现此MAC命令。
 
+ABP设备不能执行这个命令。网络服务器应忽略来自ABP设备的_**RekeyInd**_命令。
+
+对于OTA设备，_**RekeyInd**_ MAC命令用于确认安全密钥更新，以及在未来的LoRaWAN（&gt; 1.1）版本中协商在终端设备和网络服务器之间运行的次要LoRaWAN协议版本。该命令不会通知重置MAC和无线电参数（见6.2.3）。
+
+_**RekeyInd**_命令包含终端设备支持的LoRaWAN版本的次要版本。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| RekeyInd Payload | Dev LoRaWAN version |
+
+| Size（bytes） | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| Dev LoRaWAN version | RFU | Minor=1 |
+
+这个次要字段表示终端设备支持的LoRaWAN版本的次要版本。
+
+| Minor version | Minor |
+| :---: | :---: |
+| RFU | 0 |
+| 1（LoRaWAN x.1） | 1 |
+| RFU | 2:15 |
+
+OTA设备应在成功处理Join-Accept（已派生新的会话密钥）之后，在所有确认和未确认的上行链路帧中发送_**RekeyInd**_，直到收到_**RekeyConf**_。如果设备在第一个ADR\_ACK\_LIMIT上行链路内没有收到RekeyConf，它将恢复到加入状态。这样的设备在之后的任何时间里发送的_**RekeyInd**_命令都应被网络服务器丢弃。在发送**Join-accept**之后和携带_**RekeyInd**_命令的第一个上行链路帧之前，网络服务器应丢弃接收到的使用新安全上下文保护的所有上行链路帧。
+
+当网络服务器接收到一个_**RekeyInd**_时，它会用_**RekeyConf**_命令作出响应。
+
+RekeyConf命令包含一个单字节有效载荷，该有效载荷使用与“dev LoRaWAN version”相同的格式，由网络服务器支持的LoRaWAN版本编码。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| RekeyConf Payload | Serv LoRaWAN version |
+
+服务器版本必须大于0（不允许为0），且小于或等于（&lt;=）设备的LoRaWAN版本。因此，对于LoRaWAN1.1设备，唯一有效值为1。如果服务器版本无效，设备应丢弃_**RekeyConf**_命令并在下一个上行链路帧中重新传输_**RekeyInd**_。
+
+# 5.11 ADR参数（ADRParamSetupReq，ADRParamSetupAns）
+
+_**ADRParamSetupReq**_命令允许更改定义ADR回退算法的ADR\_ACK\_LIMIT和ADR\_ACK\_DELAY参数。ADRParamSetupReq命令具有单字节有效负载。
+
+| Size（bytes） | 1 |
+| :---: | :---: |
+| ADRParamSetupReq Payload | ADRparam |
+
+| Bits | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| ADRparam | Limit\_exp | Delay\_exp |
+
+Limit\_exp字段设置ADR\_ACK\_LIMIT参数值：
+
+ADR\_ACK\_LIMIT = 2^Limit\_exp
+
+Limit\_exp有效范围是0到15，对应于ADR\_ACK\_LIMIT的范围1到32768
+
+Delay\_exp字段设置ADR\_ACK\_DELAY参数值。
+
+ADR\_ACK\_ DELAY = 2^Delay\_exp
+
+Delay\_exp有效范围是0到15，对应于ADR\_ACK\_ DELAY的范围1到32768
+
+_**ADRParamSetupAns**_命令由终端设备用来确认接收_**ADRParamSetupReq**_命令。_**ADRParamSetupAns**_命令没有有效负载字段。
+
+# 5.12 DeviceTime命令（DeviceTimeReq，DeviceTimeAns）
+
+此MAC命令仅可用于在兼容LoRaWAN1.1的网络服务器上激活的设备。LoRaWAN1.0服务器不实现此MAC命令。
+
+使用_**DeviceTimeReq**_命令，终端设备可以向网络请求当前的网络日期和时间。该请求没有有效负载。
+
+使用_**DeviceTimeAns**_命令，网络服务器将网络日期和时间提供给终端设备。所提供的时间是在上行链路传输结束时捕捉的网络时间。该命令有一个5字节的有效负载，定义如下：
+
+| Size（byte） | 4 | 1 |
+| :---: | :---: | :---: |
+| DeviceTimeAns Payload | 32位无符号整数：从时代开始的秒数\* | 8位无符号整数：以1/2^8秒为单位的小数秒 |
+
+网络提供的时间必须具有+/- 100mSec的最差情况精度。
+
+（\*）GPS时代（即1980年6月1日星期日午夜）被用作原点。“秒”字段是从原点开始经过的秒数。该字段每秒单调递增1。要将此字段转换为UTC时间，必须考虑闰秒。
+
+> 例如：2016年2月12日星期五14:24:31 UTC对应GPS自GPS时代以来的1139322288秒。截至2017年6月，GPS时间比UTC时间提前17秒。
+
+# 5.13 强制重新加入命令（ForceRejoinReq）
+
+通过强制重新加入命令，网络要求设备立即发送重新加入请求类型0或类型2的消息，并且具有可编程的重试次数，周期性和数据速率。该RejoinReq上行链路可以被网络用来立即重启设备或发起切换漫游过程。
+
+该命令有两个字节的有效负载。
+
+| Bits | 15:14 | 13:11 | 10:8 | 7 | 6:4 | 3:0 |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| ForceRejoinReq bits | RFU | Period | Max\_Retries | RFU | RejoinType | DR |
+
+参数编码如下：
+
+周期：重传之间的延迟应等于32秒 x 2^Period+ Rand32，其中Rand32是\[0:32\]范围内的伪随机数。
+
+Max\_Retries：设备将重试这个重新加入请求的总次数。
+
+* 0：重新加入只发送一次（不重试）
+* 1：重新加入总共必须发送2次（1 + 1重试）
+* ...
+* 7：重新加入必须发送8次（1 + 7次重试）
+
+RejoinType：该字段指定应由设备发送的重新加入请求的类型。
+
+* 0或1：应发送重新加入请求类型0
+* 2：应发送重新申请类型2
+* 3至7：RFU
+
+DR：重新加入请求帧应使用数据速率DR发送。实际物理调制数据速率与DR值之间的对应关系遵循与_**LinkADRReq**_命令相同的约定，并且针对\[PHY\]中的每个区域定义
+
+该命令没有应答，因为设备收到该命令时务必发送一个Rejoin-Request。RejoinReq消息的第一次传输应在接收到命令后立即完成（但网络可能不会收到）。
+
+如果设备在达到传输重试次数之前收到一个新的**ForceRejoinReq**命令，设备应该用新参数继续传输RejoinReq。
+
+# 5.14 RejoinParamSetupReq（RejoinParamSetupAns）
+
+通过RejoinParamSetupReq命令，周期性地发送RejoinReq类型0消息，该消息具有可编程周期性，被定义为上行链路的时间或数量。
+
+时间和数量被推荐来处理可能没有时间测量能力的设备。指定的周期性设置两个RejoinReq传输之间的上行链路的最大时间或数量。设备可以更频繁地发送RejoinReq。
+
+该命令具有单字节有效负载。
+
+| Bits | 7:4 | 3:0 |
+| :---: | :---: | :---: |
+| RejoinParamSetupReq bits | MaxTimeN | MaxCountN |
+
+参数定义如下：
+
+MaxCountN = C = 0至15。设备必须至少在每2^\(C + 4\)个上行消息中发送一个重加请求类型0的消息。
+
+MaxTimeN = T = 0至15；设备必须至少在每2^\(T + 10\)秒内发送一次重加入请求类型0的消息。
+
+* T = 0大约相当于17分钟
+* T = 15约为1年
+
+每当满足2个条件（帧计数或时间）之一时，都会发送RejoinReq数据包。
+
+设备必须执行上行链路计数周期。基于时间的周期性是可选的。无法实现时间限制的设备必须在应答中发出信号。应答有单字节有效载荷。
+
+| Bits | Bits 7:1 | Bit 0 |
+| :---: | :---: | :---: |
+| Status bits | RFU | TimeOK |
+
+如果Bit 0 = 1，则设备已接受时间和计数限制，否则它只接受计数限制。
+
+> 注意：对于消息速率非常低且无时间测量能力的设备，LoRaWAN中未规定达到最佳计数限制的机制。
 
 
 
