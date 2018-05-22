@@ -43,7 +43,7 @@ AppKey必须存储在打算使用OTAA过程的终端设备上。
 
 对于仅限ABP的终端设备，Appkey不是必需的。
 
-NwkKey和AppKy都应该以防止恶意参与者提取和重用的方式存储。
+NwkKey和AppKy都应该以防止恶意行为者提取和重用的方式存储。
 
 ①由于所有终端设备都配备了针对每个终端设备的独特应用和网络根密钥，因此从终端设备提取AppKey / NwkKey只会影响这一个终端设备。
 
@@ -53,6 +53,60 @@ NwkKey和AppKy都应该以防止恶意参与者提取和重用的方式存储。
 
 * JSIntKey用于MIC重新加入请求类型1消息和加入接受响应
 * JSEncKey用于加密由重新加入请求触发的加入接受
+
+JSIntKey = aes128\_encrypt\(NwkKey, 0x06 \| DevEUI \| pad16\)
+
+JSEncKey = aes128\_encrypt\(NwkKey, 0x05 \| DevEUI \| pad16\)
+
+## 6.1.2 激活之后
+
+在激活之后，以下附加信息被存储在终端设备中：设备地址（**DevAddr**），网络会话密钥的三元组（**NwkSEncKey** / **SNwkSIntKey** / **FNwkSIntKey**）和应用会话密钥（**AppSKey**）。
+
+### 6.1.2.1 终端设备地址（DevAddr）
+
+**DevAddr**由32位组成，用于识别当前网络中的终端设备。
+
+DevAddr由终端设备的网络服务器分配。
+
+其格式如下：
+
+| Bit\# | \[31..32-N\] | \[31-N..0\] |
+| :---: | :---: | :---: |
+| DevAddr bits | AddrPrefix | NwkAddr |
+
+其中N是\[7:24\]范围内的整数。
+
+LoRaWAN协议支持具有不同网络地址空间大小的各种网络地址类型。除了为测试/专用网络保留的AddrPrefix值之外，可变大小的AddrPrefix字段是从由LoRa联盟分配的网络服务器的唯一标识符**NetID**（见6.2.3）派生而来的。AddrPrefix字段允许在漫游期间发现当前管理终端设备的网络服务器。不遵守此规则的设备不能在两个网络之间漫游，因为无法找到其主网络服务器。
+
+最低有效位（32-N）即终端设备的网络地址（NwkAddr）可由网络管理员任意分配。
+
+以下AddrPrefix值可以被任何私人/测试网络使用，并且不会被LoRa Aliance分配。
+
+| Private/experimental network reserved AddrPrefix |
+| :---: |
+| N=7 |
+| AddrPrefix = 7'b0000000 or AddrPrefix = 7'b0000001 |
+| NwkAddr = 25bits freely allocated by the network manager |
+
+请参阅\[BACKEND\]了解AddrPrefix字段的确切结构以及各种地址类的定义。
+
+### 6.1.2.2 转发网络会话完整性密钥（FNwkSIntKey）
+
+FNwkSIntKey是特定于终端设备的网络会话密钥。终端设备使用它来计算所有上行链路数据消息的MIC或MIC（消息完整性代码）的一部分，以确保4.4中规定的数据完整性。
+
+FNwkSIntKey应该以防止恶意行为者提取和重复使用的方式进行存储。
+
+### 6.1.2.3 提供网络会话完整性密钥（SNwkSIntKey）
+
+**SNwkSIntKey**是特定于终端设备的网络会话密钥。终端设备使用它来验证所有下行数据消息的**MIC**（消息完整性代码），以确保数据完整性并计算上行消息一半的MIC。
+
+> 注意：上行链路MIC计算依赖于两个密钥（FNwkSIntKey和SNwkSIntKey），以便允许漫游设置中的转发网络服务器能够仅验证MIC字段的一半
+
+当设备连接到LoRaWAN1.0网络服务器时，同样的密钥用于4.4中规定的上行和下行MIC计算。在这种情况下，**SNwkSIntKey**的值与**FNwkSIntKey**的值相同。
+
+**SNwkSIntKey**应该以防止恶意行为者提取和重复使用的方式进行存储。
+
+### 6.1.2.4 网络会话加密密钥（NwkSEncKey）
 
 
 
