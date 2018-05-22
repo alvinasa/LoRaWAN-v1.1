@@ -150,7 +150,7 @@ NwkSEncKey应该以防止恶意行为者提取和重复使用的方式进行存�
 
 建议在终端设备的电源循环①中保持会话状态。对于OTAA设备不这样做意味着激活过程将需要在设备的每个电源循环中执行。
 
-①将设备关闭，然后重新打开。又称为软重启、开关测试
+①power cycling（电源循环）：将设备关闭，然后重新打开。又称为软重启、开关测试
 
 # 6.2 空中激活
 
@@ -201,4 +201,134 @@ MIC = _cmac_\[0..3\]
 **JoinNonce**是设备特定的计数器值（从不重复自身），由加入服务器提供并由终端设备用来派生会话密钥**FNwkSIntKey，SNwkSIntKey，NwkSEncKey**和**AppSKey**。JoinNonce会随着每个加入接受消息而递增。
 
 设备跟踪上次成功处理的Join accept中使用的JoinNonce值（对应于上次成功的密钥派生）。只有当MIC字段正确且JoinNonce严格大于记录的字段时，设备才能接收加入接受。在这种情况下，新的JoinNonce值会替换先前存储的值。
+
+如果设备易受电源循环影响，JoinNonce应持久保存（存储在非易失性内存中）。
+
+LoRa联盟为所有网络分配一个24位唯一网络标识符（**NetID**），但以下的**NetID**值除外，这些值保留为不受管理的测试/专用网络。
+
+有2^15个私有/测试网络保留NetID值如下构建：
+
+| Nb bits | 3 | 14 | 7 |
+| :--- | :--- | :--- | :--- |
+|  | 3'b000 | XXXXXXXXXXXXXX 任意14位值 | 7'b0000000或7'b0000001 |
+
+加入接受帧的**home\_NetID**字段对应于设备主网络的**NetId**。
+
+在漫游场景中，分配devAddr和本地网络的网络可能会有所不同。要获得更高精度，请参阅\[BACKEND\]。
+
+**DLsettings**字段包含下行链路配置：
+
+| Bits | 7 | 6:4 | 3:0 |
+| :---: | :---: | :---: | :---: |
+| DLSettings | OptNeg | RX1DRoffset | RX2 Data rate |
+
+OptNeg位指示网络服务器是否实现LoRaWAN1.0协议版本（未设置）或1.1和更高版本（设置）。当OptNeg位设置时
+
+* 协议版本在终端设备和网络服务器之间进一步协商（1.1或更高版本）通过_RekeyInd_ / _RekeyConf_ MAC命令交换。
+* 设备从**NwkKey**派生**FNwkSIntKey**＆**SNwkSIntKey**＆**NwkSEncKey**
+* 设备从**AppKey**派生**AppSKey**
+
+当OptNeg位未设置时
+
+* 设备恢复到LoRaWAN1.0，不能协商任何选项
+* _**RekeyInd**_命令不由设备发送的
+* 设备从**NwkKey**派生**FNwkSIntKey**＆**AppSKey**
+* 设备将**SNwkSIntKey**＆**NwkSEncKey**设置为等于**FNwkSIntKey**
+
+这4个会话密钥**FNwkSIntKey**，**SNwkSIntKey**，**NwkSEncKey**和**AppSKey**派生如下：
+
+如果OptNeg未设置，则会话密钥从NwkKey派生，如下所示：
+
+AppSKey = aes128\_encrypt\(NwkKey, 0x02 \| JoinNonce \| NetID \| DevNonce \| pad16①\)
+
+FNwkSIntKey = aes128\_encrypt\(NwkKey, 0x01 \| JoinNonce \| NetID \| DevNonce \| pad16\)
+
+SNwkSIntKey = NwkSEncKey = FNwkSIntKey.
+
+加入接受消息的MIC值计算如下：②
+
+_cmac_ = aes128\_cmac\(**NwkKey**, MHDR \| JoinNonce \| NetID \| DevAddr \| DLSettings \| RxDelay \| CFList \)
+
+MIC = _cmac_\[0..3\]
+
+否则，如果OptNeg已设置，则AppSKey将从AppKey派生，如下所示：
+
+AppSKey = aes128\_encrypt\(AppKey, 0x02 \| JoinNonce \| JoinEUI \| DevNonce \| pad16\)
+
+且网络会话密钥来源于NwkKey：
+
+FNwkSIntKey = aes128\_encrypt\(NwkKey, 0x01 \| JoinNonce \| JoinEUI \| DevNonce \| pad16 \)
+
+SNwkSIntKey = aes128\_encrypt\(NwkKey, 0x03 \| JoinNonce \| JoinEUI \| DevNonce \| pad16\)
+
+NwkSEncKey = aes128\_encrypt\(NwkKey, 0x04 \| JoinNonce \| JoinEUI \| DevNonce \| pad16\)
+
+在这种情况下，MIC值计算如下：③
+
+_cmac_ = aes128\_cmac\(**JSIntKey**, JoinReqType \| JoinEUI \| DevNonce \| MHDR \| JoinNonce \| NetID \| DevAddr \| DLSettings \| RxDelay \| CFList \)
+
+MIC = _cmac_\[0..3\]
+
+JoinReqType是一个单字节字段，用于编码触发加入接受响应的加入请求或重新加入请求类型。
+
+| Join-request or Rejoin-request type | JoinReqType value |
+| :--- | :--- |
+| Join-request | 0xFF |
+| Rejoin-request type 0 | 0x00 |
+| Rejoin-request type 1 | 0x01 |
+| Rejoin-request type 2 | 0x02 |
+
+用于加密加入接受消息的密钥是触发它的加入或重新加入请求消息的函数。
+
+| Triggering Join-request or Rejoin-request type | Join-accept Encryption Key |
+| :--- | :--- |
+| Join-request | **NwkKey** |
+| Rejoin-request type 0 or 1 or 2 | **JSEncKey** |
+
+加入接受消息按如下加密：
+
+aes128\_decrypt\(**NwkKey** or **JSEncKey**, JoinNonce \| NetID \| DevAddr \| DLSettings \| RxDelay \| CFList \| MIC\).
+
+①pad16函数附加零字节，以便数据的长度为16的倍数
+
+②\[RFC4493\]
+
+③\[RFC4493\]
+
+消息长度为16或32个字节。
+
+> 注意：ECB模式下的AES解密操作用于加密加入接受消息，以便终端设备可以使用AES加密操作解密消息。这样一个终端设备只需要实现AES加密而不是AES解密。
+>
+> 注意：建立这四个会话密钥允许联网的网络服务器基础结构，网络运营商不能窃听应用数据。应用提供商向网络运营商承诺，它将收取终端设备发生的任何流量的费用，并保留对用于保护其应用数据的AppSKey的完全控制权。
+>
+> 注意：设备的协议版本（1.0或1.1）在后端侧与DevEUI和设备的NWKKY和可能的AppKy同时注册。
+
+RX1DRoffset字段设置上行数据速率与用于在第一个接收时隙（RX1）上与终端设备通信的下行数据速率之间的偏移量。默认情况下，此偏移量为0。偏移量用于考虑某些地区基站的最大功率密度限制，并平衡上行链路和下行链路无线链路余量。
+
+上行链路和下行链路数据速率之间的实际关系是区域特定的，并在\[PHY\]中定义
+
+延迟**RxDelay**遵循与_**RXTimingSetupReq**_命令中的延迟字段相同的约定。
+
+如果在以下传输之后接收到加入接受消息：
+
+* 加入请求或重新加入请求类型为0或1，如果CFlist字段不存在，则设备应该恢复到默认的信道定义。如果CFlist存在，它将覆盖当前定义的所有信道。由加入接受消息传输的MAC层参数（RXdelay1，RX2数据速率和RX1 DR Offset除外）应全部重置为其默认值。
+* 重加入请求类型为2，如果CFlist字段不存在，设备应保持其当前信道定义不变。如果CFlist存在，它将覆盖当前定义的所有通道。所有其他MAC参数（复位的帧计数器除外）保持不变。
+
+在成功处理加入接受消息后的所有情况下，设备都应该发送_**RekeyInd**_ MAC命令，直到它收到_**RekeyConf**_命令（见5.9）。_**RekeyInd**_上行链路命令的接收被网络服务器用作切换到新的安全上下文的信号。
+
+## 6.2.4 重新加入请求消息
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
