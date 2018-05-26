@@ -10,7 +10,7 @@
 * [7 重传回退](zhong-chuan-hui-tui.md)
 * [Class B - 信标](class-b-xin-biao.md)
 * [8 B类介绍](blei-jie-shao.md)
-* [9 同步网络发起下行链路的原理（B类选项）](9-tong-bu-wang-luo-fa-qi-xia-xing-lian-lu-de-yuan-li.md)
+* [9 同步网络发起下行链路的原理（B类可选）](9-tong-bu-wang-luo-fa-qi-xia-xing-lian-lu-de-yuan-li.md)
 * 10 B类模式的上行链路帧
 * 11 下行Ping帧格式（B类选项）
 * 12 信标采集和跟踪
