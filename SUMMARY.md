@@ -12,7 +12,7 @@
 * [8 B类介绍](blei-jie-shao.md)
 * [9 同步网络发起下行链路的原理（B类可选）](9-tong-bu-wang-luo-fa-qi-xia-xing-lian-lu-de-yuan-li.md)
 * [10 B类模式的上行链路帧](10-blei-mo-shi-de-shang-xing-lian-lu-zheng.md)
-* 11 下行Ping帧格式（B类选项）
+* [11 下行Ping帧格式（B类可选）](11-xia-xing-ping-zheng-ge-shi-ff08-b-lei-xuan-xiang-ff09.md)
 * 12 信标采集和跟踪
 * 13 B类下行时隙时序
 * 14 B类MAC命令
