@@ -14,7 +14,7 @@
 * [10 B类模式的上行链路帧](10-blei-mo-shi-de-shang-xing-lian-lu-zheng.md)
 * [11 下行Ping帧格式（B类可选）](11-xia-xing-ping-zheng-ge-shi-ff08-b-lei-xuan-xiang-ff09.md)
 * [12 信标采集和跟踪](12-xin-biao-cai-ji-he-gen-zong.md)
-* 13 B类下行时隙时序
+* [13 B类下行时隙时序](13-blei-xia-xing-shi-xi-shi-xu.md)
 * 14 B类MAC命令
 * 15 信标（B类选项）
 * 16 B类单播和多播下行链路信道频率
