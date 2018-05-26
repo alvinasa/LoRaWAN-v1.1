@@ -16,7 +16,7 @@
 * [12 信标采集和跟踪](12-xin-biao-cai-ji-he-gen-zong.md)
 * [13 B类下行时隙时序](13-blei-xia-xing-shi-xi-shi-xu.md)
 * [14 B类MAC命令](14-blei-mac-ming-ling.md)
-* 15 信标（B类选项）
+* [15 信标（B类可选）](15-xin-biao-ff08-b-lei-xuan-xiang-ff09.md)
 * 16 B类单播和多播下行链路信道频率
 * Class C - 持续监听
 * 17 C类：连续监听终端设备
