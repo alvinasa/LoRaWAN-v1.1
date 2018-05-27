@@ -17,7 +17,7 @@
 * [13 B类下行时隙时序](13-blei-xia-xing-shi-xi-shi-xu.md)
 * [14 B类MAC命令](14-blei-mac-ming-ling.md)
 * [15 信标（B类可选）](15-xin-biao-ff08-b-lei-xuan-xiang-ff09.md)
-* 16 B类单播和多播下行链路信道频率
+* [16 B类单播和组播下行链路信道频率](16-blei-dan-bo-he-duo-bo-xia-xing-lian-lu-xin-dao-pin-lv.md)
 * Class C - 持续监听
 * 17 C类：连续监听终端设备
 * 18 C类MAC命令
