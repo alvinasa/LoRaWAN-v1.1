@@ -1,4 +1,4 @@
-例子是LoRaWAN规范的信息说明，但它们不是正式规范的一部分。
+示例是LoRaWAN规范的信息说明，但它们不是正式规范的一部分。
 
 # 19.1 确认数据信息的上行链路时序图
 
@@ -47,12 +47,4 @@ FPending位，ACK位和有效载荷数据都可以出现在相同的下行链路
 ![](/assets/Figure 71: Downlink timing diagram for frame-pending messages, example 3.png)
 
 终端设备发送“确认数据”上行链路。网络可以用包含数据+ ACK +“帧未决”的确认下行链路来回答，则交换如前所述继续。
-
-
-
-
-
-
-
-
 
