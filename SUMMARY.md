@@ -22,7 +22,7 @@
 * [17 C类：连续监听终端设备](17-clei-ff1a-lian-xu-jian-ting-zhong-duan-she-bei.md)
 * [18 C类MAC命令](18-clei-mac-ming-ling.md)
 * [支持信息](zhi-chi-xin-xi.md)
-* 19 示例和应用信息
+* [19 示例和应用信息](19-shi-li-he-ying-yong-xin-xi.md)
 * 20 关于在供应时由终端设备提供商向网络服务器提供合同的建议
 * 21 有关查找本地使用频道的建议
 * 22 修订
