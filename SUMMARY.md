@@ -23,7 +23,7 @@
 * [18 C类MAC命令](18-clei-mac-ming-ling.md)
 * [支持信息](zhi-chi-xin-xi.md)
 * [19 示例和应用信息](19-shi-li-he-ying-yong-xin-xi.md)
-* 20 关于在供应时由终端设备提供商向网络服务器提供合同的建议
+* [20 关于在供应时由终端设备提供商向网络服务器提供约定的建议](20-guan-yu-zai-gong-ying-shi-you-zhong-duan-she-bei-ti-gong-shang-xiang-wang-luo-fu-wu-qi-ti-gong-he-tong-de-jian-yi.md)
 * 21 有关查找本地使用频道的建议
 * 22 修订
 * 23 词汇表
