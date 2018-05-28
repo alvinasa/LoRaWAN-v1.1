@@ -49,7 +49,7 @@
 
 本节概述了LoRaWAN1.1和LoRaWAN1.0.2之间的主要变化。
 
-# 22.4.1 说明
+## 22.4.1 说明
 
 * 语法的
 * 规范性文字一贯使用
@@ -63,13 +63,132 @@
 * MAC命令如果存在于FOpts和Payload中则被丢弃
 * 重传回退说明
 
-# 22.4.2 功能修改
+## 22.4.2 功能修改
 
+* FCnt变化
+  * 所有计数器都是32位宽，不再支持16位
+  * 将FCntDown分离为AFCntDown和NFCntDown
+    * 从NS / AS中删除状态同步要求
+  * 如果FCnt间隙大于MAX\_FCNT\_GAP，则移除丢弃帧的要求
+    * 不需要32位计数器
+  * 成功处理加入接受后，终端设备帧计数器将重置
+  * ABP设备不得重置帧计数器
+* 重传（不增加FCnt的传输）
+  * 下行链路帧不会重新传输
+  * 后续接收具有相同FCnt的帧将被忽略
+  * 上行链路重传由NbTrans控制（这包括确认帧和未确认帧）
+  * 在RX1和RX2接收窗口都过期之前，重发可能不会发生
+  * B / C类设备在接收到RX1窗口中的帧后停止重新发送帧
+  * A类设备在接收到RX1或RX2窗口中的帧时停​​止重新发送帧
+* 密钥变化
+  * 增加了一个新的根密钥（拆分密码功能）
+    * NwkKey和AppKey
+  * 增加了新的会话密钥
+    * NwkSEncKey加密Fport = 0的有效载荷（MAC命令有效载荷）
+    * AppSKey加密Fport != 0（应用有效载荷）
+    * NwkSIntKey用于MIC下行链路帧
+      * 对于设置了ACK位的下行链路，产生ACK的确认上行链路的AFCntUp的2个LSB被加到MIC计算中
+    * SNwkSIntKey和FNwkSIntKey用于MIC上行链路帧
+      * 每个用于计算2个独立的16位MIC，并将其组合为一个32位MIC
+      * SNwkSIntKey部分被认为是“私有的”，不与漫游的fNs共享
+      * FNwkSIntKey部分被认为是“公共的”，并可能与漫游的fNs共享
+      * 私有的MIC部分现在使用TxDr，TxCh
+      * 对于设置了ACK位的上行链路，产生ACK的确认下行链路的FCntDown的2个LSB被添加到专用MIC计算
+    * 全部的密钥定义在后面（第6节）
+  * 相关的MIC和加密改为使用新密钥
+* MAC命令介绍
+  * TxParamSetupReq/Ans
 
+  * DlChannelReq/Ans
 
+  * ResetInd/Conf
 
+  * ADRParamSetupReq/Ans
 
+  * DeviceTimeReq/Ans
 
+  * ForceRejoinReq
+
+  * RejoinParamSetupReq/Ans
+
+  * 对于linkADRReq命令
+
+    * 值0xF对于Dr或TXPower将被忽略
+
+    * NbTrans的值0被忽略
+* 激活
+
+  * JoinEUI替换AppEUI（阐明）
+
+  * EUI完全定义
+
+  * 根密钥定义
+
+    * NwkKey
+
+    * AppKey
+
+  * 添加了额外的会话密钥（拆分MIC /加密密钥）
+
+    * SNwkSIntKeyUp和FNwkSIntKeyUp（拆分MIC上行链路）
+
+    * NwkSIntKeyDown（MIC下行链路）
+
+    * NwkSEncKey（加密上行/下行）
+
+    * JSIntKey（重新加入请求和相关的加入接受）
+
+    * JSencKey（加入接受响应重新加入请求）
+
+  * 会话上下文定义
+
+* OTAA
+
+  * 加入接受MIC修改以防止重放攻击
+
+  * 会话密钥派生定义
+
+  * 重新加入请求消息定义（一个新的LoRaWAN消息类型\[MType\]）
+
+    * 0  - 切换漫游协助
+
+    * 1  - 后端状态恢复辅助
+
+    * 2  - 重新设置会话密钥
+
+  * 所有的随机数现在都是计数器（不再是随机数）
+
+  * NetId阐明（与本地网络关联）
+
+  * 在加入接受中定义的OptNeg位用于识别1.0或1.1+网络后端的操作版本
+
+    * 1.0操作反转由1.1设备定义
+
+* ABP
+
+  * 描述额外会话密钥的要求
+
+* B类
+
+  * 网络现在控制设备的DR
+
+  * 信标定义已移至区域文档
+
+  * 说明
+
+  * 弃用BeaconTimingReq / Ans（由标准MAC命令DeviceTimeReq / Ans取代）
+
+* C类
+
+  * 明确DL超时的要求
+
+  * 添加C类MAC命令
+
+    * DeviceModeInd/Conf
+
+## 22.4.3 示例
+
+* 在重传期间删除积极的数据速率回退示例
 
 
 
