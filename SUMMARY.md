@@ -27,6 +27,6 @@
 * [21 有关查找本地使用信道的建议](21-you-guan-cha-zhao-ben-di-shi-yong-pin-dao-de-jian-yi.md)
 * [22 版本](22-xiu-ding.md)
 * [23 词汇表](23-ci-hui-biao.md)
-* 24 参考书目
+* [24 参考书目](24-can-kao-shu-mu.md)
 * 25 使用和披露声明
 
