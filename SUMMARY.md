@@ -28,5 +28,5 @@
 * [22 版本](22-xiu-ding.md)
 * [23 词汇表](23-ci-hui-biao.md)
 * [24 参考书目](24-can-kao-shu-mu.md)
-* 25 使用和披露声明
+* [25 使用和披露声明](25-shi-yong-he-pi-lu-sheng-ming.md)
 
