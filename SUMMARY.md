@@ -26,7 +26,7 @@
 * [20 关于在供应时由终端设备提供商向网络服务器提供约定的建议](20-guan-yu-zai-gong-ying-shi-you-zhong-duan-she-bei-ti-gong-shang-xiang-wang-luo-fu-wu-qi-ti-gong-he-tong-de-jian-yi.md)
 * [21 有关查找本地使用信道的建议](21-you-guan-cha-zhao-ben-di-shi-yong-pin-dao-de-jian-yi.md)
 * [22 版本](22-xiu-ding.md)
-* 23 词汇表
+* [23 词汇表](23-ci-hui-biao.md)
 * 24 参考书目
 * 25 使用和披露声明
 
