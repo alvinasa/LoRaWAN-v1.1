@@ -436,7 +436,7 @@ MIC = _cmac_\[0..3\]
 
 ![](/assets/Figure 48 : LoRaWAN1.0 key derivation scheme.png)
 
-**LoRaWAN1.0网络后端：**
+**LoRaWAN1.1网络后端：**
 
 ![](/assets/Figure 49 : LoRaWAN1.1 key derivation scheme.png)
 
