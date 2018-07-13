@@ -19,7 +19,7 @@ Class A规范中描述的所有命令都应在C类设备中实现。C类规范�
 | :---: | :---: |
 | Class A | 0x00 |
 | RFU | 0x01 |
-| Class B | 0x02 |
+| Class C | 0x02 |
 
 当网络服务器接收到_**DeviceModeInd**_命令时，它会用_**DeviceModeConf**_命令作出响应。设备应在所有上行链路中包含_**DeviceModeInd**_命令，直到接收到_**DeviceModeConf**_命令。
 
@@ -34,24 +34,4 @@ _**DeviceModeConf**_命令有一个1字节的有效载荷。
 | DeviceModeConf Payload | Class |
 
 定义的类参数如同**DeviceModeInd**命令
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
