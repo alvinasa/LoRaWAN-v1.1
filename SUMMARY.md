@@ -26,7 +26,7 @@
 * [20 关于在供应时由终端设备提供商向网络服务器提供约定的建议](recommendation-on-contract-to-be-provided-to-the-network-server-by-the-end-device-provider-at-the-ti.md)
 * [21 有关查找本地使用信道的建议](recommendation-on-finding-the-locally-used-channels.md)
 * [22 版本](revisions.md)
-* [23 词汇表](23-ci-hui-biao.md)
-* [24 参考书目](24-can-kao-shu-mu.md)
-* [25 使用和披露声明](25-shi-yong-he-pi-lu-sheng-ming.md)
+* [23 词汇表](glossary.md)
+* [24 参考书目](bibliography.md)
+* [25 使用和披露声明](notice-of-use-and-disclosure.md)
 
