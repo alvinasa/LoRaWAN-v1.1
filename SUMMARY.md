@@ -2,8 +2,8 @@
 
 * [1 介绍](README.md)
 * [2 LoRaWAN选项介绍](introduction-on-lorawan-options.md)
-* [Class A - 所有终端设备](class-a-suo-you-zhong-duan-she-bei.md)
-* [3 物理消息格式](wu-li-xiao-xi-ge-shi.md)
+* [Class A - 所有终端设备](class-a-all-end-devices.md)
+* [3 物理消息格式](physical-message-formats.md)
 * [4 MAC消息格式](macxiao-xi-ge-shi.md)
 * [5 MAC命令](macming-ling.md)
 * [6 终端设备激活](zhong-duan-she-bei-ji-huo.md)
