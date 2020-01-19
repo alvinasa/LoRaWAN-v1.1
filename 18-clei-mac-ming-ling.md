@@ -1,3 +1,5 @@
+# 18 C类MAC命令
+
 Class A规范中描述的所有命令都应在C类设备中实现。C类规范添加了以下MAC命令。
 
 | CID | Command | 发送方 | 简要说明 |
@@ -5,7 +7,7 @@ Class A规范中描述的所有命令都应在C类设备中实现。C类规范�
 | 0x20 | DeviceModeInd | 终端设备 | 由终端设备用于指示其当前的操作模式（A类或C类） |
 | 0x20 | DeviceModeConf | 网关 | 由网络用于确认_**DeviceModeInd**_命令 |
 
-# 18.1 设备模式（DeviceModeInd，DeviceModeConf）
+## 18.1 设备模式（DeviceModeInd，DeviceModeConf）
 
 使用_**DeviceModeInd**_命令，终端设备向网络表明它希望在A类或C类中运行。该命令具有一个字节的有效载荷，其定义如下：
 

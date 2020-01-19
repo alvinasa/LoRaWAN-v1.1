@@ -1,3 +1,5 @@
+# 5 MAC命令
+
 对于网络管理，可以在网络服务器和终端设备上的MAC层之间专门交换一组MAC命令。MAC层命令对应用或应用服务器或运行在终端设备上的应用永远不可见。
 
 单个数据帧可以包含任何序列的MAC命令，或者捎带在**FOpts**字段中，或者当作为单独的数据帧发送时，将**FPort**字段设置为0的**FRMPayload**字段中。捎带的MAC命令始终以加密方式发送，并且必须不超过15个字节。作为**FRMPayload**发送的MAC命令始终是加密的，不得超过最大**FRMPayload**长度。
@@ -50,7 +52,7 @@ MAC命令由接收端应答/确认，与发送保持相同的顺序。每个MAC�
 >
 > 注意：MAC命令的长度没有明确给出，必须由MAC实现隐含知道。因此未知的MAC命令不能被跳过，并且第一个未知的MAC命令终止MAC命令序列的处理。因此建议根据MAC命令首次出现的LoRaWAN规范版本来排序MAC命令。通过这种方式，所有的LoRaWAN规范版本之前的所有MAC命令都可以被处理，即使指定的当前MAC命令是在更早的LoRaWAN规范中实现。
 
-# 5.1 重置指示命令（ResetInd，ResetConf）
+## 5.1 重置指示命令（ResetInd，ResetConf）
 
 此MAC命令仅适用于兼容LoRaWAN1.1网络服务器上激活的ABP设备。LoRaWAN1.0服务器不实现此MAC命令。
 
@@ -92,7 +94,7 @@ ResetConf命令包含一个单字节有效载荷，由网络服务器所支持�
 
 如果服务器版本无效，则设备应丢弃**ResetConf**命令并在下一个上行链路帧中重新发送**ResetInd**。
 
-# 5.2 链路检查命令（LinkCheckReq，LinkCheckAns）
+## 5.2 链路检查命令（LinkCheckReq，LinkCheckAns）
 
 使用**LinkCheckReq**命令，终端设备可以验证其与网络的连接。该命令没有有效载荷。
 
@@ -106,7 +108,7 @@ ResetConf命令包含一个单字节有效载荷，由网络服务器所支持�
 
 网关计数（**GwCnt**）是成功接收最后一个**LinkCheckReq**命令的网关数值。
 
-# 5.3 链路ADR命令（LinkADRReq，LinkADRAns）
+## 5.3 链路ADR命令（LinkADRReq，LinkADRAns）
 
 使用**LinkADRReq**命令，网络服务器请求终端设备执行速率适配。
 
@@ -159,7 +161,7 @@ ResetConf命令包含一个单字节有效载荷，由网络服务器所支持�
 
 如果这三者中的任何一位等于0，则该命令不成功并且节点保持先前的状态。
 
-# 5.4 终端设备发送占空比（DutyCycleReq，DutyCycleAns）
+## 5.4 终端设备发送占空比（DutyCycleReq，DutyCycleAns）
 
 网络协调器使用**DutyCycleReq**命令来限制终端设备的最大聚合传输占空比。聚合传输占空比对应于所有子带上的传输占空比。
 
@@ -179,7 +181,7 @@ _aggrated duty cycle_ = 1/2^MaxDCycle
 
 终端设备通过**DutyCycleAns**命令来应答**DutyCycleReq**。**DutyCycleAns** MAC回复不包含任何有效负载。
 
-# 5.5 接收窗口参数（RXParamSetupReq，RXParamSetupAns）
+## 5.5 接收窗口参数（RXParamSetupReq，RXParamSetupAns）
 
 **RXParamSetupReq**命令允许更改每个上行链路之后第二个接收窗口（RX2）的频率和数据速率。该命令还允许对上行链路和RX1时隙下行链路数据速率之间的偏移进行设置。
 
@@ -217,7 +219,7 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 
 如果3位中的任何一位等于0，则该命令不成功，并且必须保留先前的参数。
 
-# 5.6 终端设备状态（DevStatusReq，DevStatusAns）
+## 5.6 终端设备状态（DevStatusReq，DevStatusAns）
 
 通过**DevStatusReq**命令，网络服务器可以向终端设备请求状态信息。该命令没有有效载荷。如果终端设备收到**DevStatusReq**，它必须用**DevStatusAns**命令响应。
 
@@ -239,7 +241,7 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 | :---: | :---: | :---: |
 | Status | RFU | Margin |
 
-# 5.7 信道的创建/修改（NewChannelReq，NewChannelAns，DlChannelReq，DlChannelAns）
+## 5.7 信道的创建/修改（NewChannelReq，NewChannelAns，DlChannelReq，DlChannelAns）
 
 设备运行在定义了固定信道规划的地区不应执行这些MAC命令。这些命令不应该被设备应答。请参阅\[PHY\]了解适用的区域。
 
@@ -313,7 +315,7 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 | Channel frequency ok | 设备无法使用该频率 | 设备能够使用这个频率。 |
 | Uplink frequency exists | 没有为该信道定义上行链路频率，只能为已经具有有效上行链路频率的信道设置下行链路频率 | 信道的上行频率是有效的 |
 
-# 5.8 设置TX和RX之间的延迟（RXTimingSetupReq，RXTimingSetupAns）
+## 5.8 设置TX和RX之间的延迟（RXTimingSetupReq，RXTimingSetupAns）
 
 **RXTimingSetupReq**命令允许配置TX上行链路结束和第一个接收时隙打开之间的延迟。第二个接收时隙在第一个接收时隙后一秒打开。
 
@@ -327,7 +329,7 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 | :---: | :---: | :---: |
 | Settings | RFU | Del |
 
-延迟以秒表示。**Del **0被映射到1秒。
+延迟以秒表示。**Del** 0被映射到1秒。
 
 | Del | Delay \[s\] |
 | :---: | :---: |
@@ -342,7 +344,7 @@ RX1DRoffset字段设置上行数据速率与下行数据速率之间的偏移量
 
 **RXTimingSetupAns**命令应添加到所有上行链路的FOpt字段中，直到终端设备收到A类下行链路。这保证即使存在上行链路包丢失，网络总是知道终端设备使用的下行链路参数。
 
-# 5.9 终端设备传输参数（TxParamSetupReq，TxParamSetupAns）
+## 5.9 终端设备传输参数（TxParamSetupReq，TxParamSetupAns）
 
 该MAC命令需要执行以符合规定在某些监管区域。请参考\[PHY\]。
 
@@ -377,7 +379,7 @@ EIRP\_DwellTime字段的结构如下所述：
 
 当这个MAC命令在不需要的地区使用时，设备不处理它，并且不应该发送确认。
 
-# 5.10 重新设置命令（RekeyInd，RekeyConf）
+## 5.10 重新设置命令（RekeyInd，RekeyConf）
 
 此MAC命令仅适用于在兼容LoRaWAN1.1网络服务器上激活的OTA设备。LoRaWAN1.0服务器不实现此MAC命令。
 
@@ -415,7 +417,7 @@ RekeyConf命令包含一个单字节有效载荷，该有效载荷使用与“de
 
 服务器版本必须大于0（不允许为0），且小于或等于（&lt;=）设备的LoRaWAN版本。因此，对于LoRaWAN1.1设备，唯一有效值为1。如果服务器版本无效，设备应丢弃_**RekeyConf**_命令并在下一个上行链路帧中重新传输_**RekeyInd**_。
 
-# 5.11 ADR参数（ADRParamSetupReq，ADRParamSetupAns）
+## 5.11 ADR参数（ADRParamSetupReq，ADRParamSetupAns）
 
 _**ADRParamSetupReq**_命令允许更改定义ADR回退算法的ADR\_ACK\_LIMIT和ADR\_ACK\_DELAY参数。ADRParamSetupReq命令具有单字节有效负载。
 
@@ -441,7 +443,7 @@ Delay\_exp有效范围是0到15，对应于ADR\_ACK\_ DELAY的范围1到32768
 
 _**ADRParamSetupAns**_命令由终端设备用来确认接收_**ADRParamSetupReq**_命令。_**ADRParamSetupAns**_命令没有有效负载字段。
 
-# 5.12 DeviceTime命令（DeviceTimeReq，DeviceTimeAns）
+## 5.12 DeviceTime命令（DeviceTimeReq，DeviceTimeAns）
 
 此MAC命令仅可用于在兼容LoRaWAN1.1的网络服务器上激活的设备。LoRaWAN1.0服务器不实现此MAC命令。
 
@@ -459,7 +461,7 @@ _**ADRParamSetupAns**_命令由终端设备用来确认接收_**ADRParamSetupReq
 
 > 例如：2016年2月12日星期五14:24:31 UTC对应GPS自GPS时代以来的1139322288秒。截至2017年6月，GPS时间比UTC时间提前17秒。
 
-# 5.13 强制重新加入命令（ForceRejoinReq）
+## 5.13 强制重新加入命令（ForceRejoinReq）
 
 通过强制重新加入命令，网络要求设备立即发送重新加入请求类型0或类型2的消息，并且具有可编程的重试次数，周期性和数据速率。该RejoinReq上行链路可以被网络用来立即重新设置设备或发起切换漫游过程。
 
@@ -492,7 +494,7 @@ DR：重新加入请求帧应使用数据速率DR发送。实际物理调制数�
 
 如果设备在达到传输重试次数之前收到一个新的**ForceRejoinReq**命令，设备应该用新参数继续传输RejoinReq。
 
-# 5.14 RejoinParamSetupReq（RejoinParamSetupAns）
+## 5.14 RejoinParamSetupReq（RejoinParamSetupAns）
 
 通过RejoinParamSetupReq命令，周期性地发送RejoinReq类型0消息，该消息具有可编程周期性，被定义为上行链路的时间或数量。
 
@@ -524,6 +526,4 @@ MaxTimeN = T = 0至15；设备必须至少在每2^\(T + 10\)秒内发送一次�
 如果Bit 0 = 1，则设备已接受时间和计数限制，否则它只接受计数限制。
 
 > 注意：对于消息速率非常低且无时间测量能力的设备，LoRaWAN中未规定达到最佳计数限制的机制。
-
-
 

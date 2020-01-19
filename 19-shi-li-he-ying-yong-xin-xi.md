@@ -1,10 +1,12 @@
+# 19 示例和应用信息
+
 示例是LoRaWAN规范的信息说明，但它们不是正式规范的一部分。
 
-# 19.1 确认数据信息的上行链路时序图
+## 19.1 确认数据信息的上行链路时序图
 
 下图说明了终端设备尝试传输两个确认数据帧（Data0和Data1）的步骤。此设备的NbTrans参数必须大于或等于2，这样此示例才是有效的（因为第一次确认的帧传输了两次）
 
-![](/assets/Figure 67: Uplink timing diagram for confirmed data messages.png)
+![](.gitbook/assets/figure-67-uplink-timing-diagram-for-confirmed-data-messages.png)
 
 终端设备首先在任意时刻和任意频道上发送一个包含Data0有效载荷的确认数据帧。帧计数器Cu通过将1加到先前的上行链路帧计数器而简单地派生。网络接收帧，并使用终端设备的第一个接收窗口生成一个下行帧，其ACK位在1秒钟后刚好设置为RECEIVE\_DELAY。该下行链路帧使用与Data0上行链路相同的数据速率和相同的信道。下行链路帧计数器Cd也通过将1加到朝向该特定终端设备的最后下行链路而派生。如果没有下行链路有效载荷，则网络将生成没有有效载荷的帧。在这个例子中，没有收到携带ACK位的帧。
 
@@ -12,17 +14,17 @@
 
 本例中的第三个ACK帧也携带应用负载。下行链路帧可以携带ACK，MAC控制命令和有效载荷的任意组合。
 
-# 19.2 确认数据消息的下行链路时序图
+## 19.2 确认数据消息的下行链路时序图
 
 下图说明了“确认”下行链路的基本顺序。
 
-![](/assets/Figure 68: Downlink timing diagram for confirmed data messages.png)
+![](.gitbook/assets/figure-68-downlink-timing-diagram-for-confirmed-data-messages.png)
 
 帧交换由终端设备发起，在信道A上发送“未经确认”的应用负载或任何其他帧。网络使用下行链路接收窗口在同一信道A上向终端设备发送“已确认”数据帧，当接收到需要确认的数据帧时，终端设备根据自己的判断传送一个ACK位置1的帧。该帧还可能包含捎带的数据或MAC命令作为其有效载荷。该ACK上行链路被视为与任何标准上行链路一样，并且因此在可能不同于信道A的随机信道上传输。
 
 > 注意：为了允许终端设备尽可能简单并且尽可能保持尽可能少的状态，它可以在接收到需要确认的数据消息之后立即发送明确的（可能是空的）确认数据消息。或者终端设备可以推迟确认的传输，以将其与其下一个数据消息搭载。
 
-# 19.3 帧等待消息的下行链路时序图
+## 19.3 帧等待消息的下行链路时序图
 
 下图说明了下行链路**帧等待**（FPending）位的使用。FPending位只能在下行链路帧上设置，并通知终端设备网络有几个待定帧；该位对于所有上行链路帧都被忽略。
 
@@ -32,11 +34,11 @@
 
 \(\*\) F\_PF\_P意思是“帧等待”位设置
 
-![](/assets/Figure 69: Downlink timing diagram for frame-pending messages, example 1.png)
+![](.gitbook/assets/figure-69-downlink-timing-diagram-for-frame-pending-messages-example-1.png)
 
 在这个例子中，网络有两个确认的数据帧传输到终端设备。帧交换由终端设备通过信道A上的正常“未确认”上行链路消息启动。网络使用第一个接收窗口传输Data0，并将FPending位设置为已确认的数据消息。设备通过回传一个空帧并通过在新信道B上设置的ACK位来确认帧的接收。RECEIVE\_DELAY1秒后，网络在信道B上发送第二帧Data1，再次使用已确认的数据消息，但使用FPending位清零。终端设备在信道C上确认。
 
-![](/assets/Figure 70: Downlink timing diagram for frame-pending messages, example 2.png)
+![](.gitbook/assets/figure-70-downlink-timing-diagram-for-frame-pending-messages-example-2.png)
 
 在这个例子中，下行链路帧是“未确认”帧，终端设备不需要发回并确认。接收Data0未确认帧且设置FPending位，终端设备发送一个空的数据帧。该第一个上行链路不被网络接收。如果在两个接收窗口期间没有收到下行链路，则网络必须等待终端设备的下一个自发上行链路重试传输。终端设备可以通过发送一个新的空白数据帧来加速程序。
 
@@ -44,7 +46,7 @@
 
 FPending位，ACK位和有效载荷数据都可以出现在相同的下行链路中。例如，以下帧交换完全有效。
 
-![](/assets/Figure 71: Downlink timing diagram for frame-pending messages, example 3.png)
+![](.gitbook/assets/figure-71-downlink-timing-diagram-for-frame-pending-messages-example-3.png)
 
 终端设备发送“确认数据”上行链路。网络可以用包含数据+ ACK +“帧未决”的确认下行链路来回答，则交换如前所述继续。
 

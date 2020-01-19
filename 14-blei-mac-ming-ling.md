@@ -1,3 +1,5 @@
+# 14 B类MAC命令
+
 A类规范中描述的所有命令都应在B类设备中实现。B类规范添加了以下MAC命令。
 
 | CID | Command | 发送方 | 简要说明 |
@@ -11,7 +13,7 @@ A类规范中描述的所有命令都应在B类设备中实现。B类规范添�
 | 0x13 | _**BeaconFreqReq**_ | 网关 | 网络服务器用于修改终端设备期望接收信标广播的频率的命令 |
 | 0x13 | _**BeaconFreqAns**_ | 终端设备 | 由终端设备用来确认BeaconFreqReq命令 |
 
-# 14.1 PingSlotInfoReq
+## 14.1 PingSlotInfoReq
 
 通过_**PingSlotInfoReq**_命令，终端设备将通知服务器其单播ping时隙的周期性。此命令只能用于通知服务器单播ping时隙的周期性。组播时隙完全由应用定义，不应使用此命令。
 
@@ -29,14 +31,14 @@ _pingNb_ = 2^\(_7-Periodicity_\) _and pingPeriod_ = 2^\(_5+Periodicity_\)
 
 实际的ping时隙周期将以秒为单位等于0.96×2^_Periodicity_
 
-* **Periodicity **= 0意味着终端设备在beacon\_window间隔期间大约每秒钟都会打开一个ping时隙
-* **Periodicity **= 7，每128秒是LoRaWAN Class B规范支持的最大ping周期。
+* **Periodicity** = 0意味着终端设备在beacon\_window间隔期间大约每秒钟都会打开一个ping时隙
+* **Periodicity** = 7，每128秒是LoRaWAN Class B规范支持的最大ping周期。
 
 为了改变ping时隙的周期性，设备应首先恢复到A类，通过_**PingSlotInfoReq**_命令发送新的周期性，并通过_**PingSlotInfoAns**_从服务器获得确认。然后可以用新的周期性切换回到B类。
 
 该命令可以与**FHDRFOpt**字段中的任何其他MAC命令级联，如A类规范帧格式中所述。
 
-# 14.2 BeaconFreqReq
+## 14.2 BeaconFreqReq
 
 该命令由服务器发送到终端设备，以修改终端设备期望信标的频率。
 
@@ -68,7 +70,7 @@ _pingNb_ = 2^\(_7-Periodicity_\) _and pingPeriod_ = 2^\(_5+Periodicity_\)
 | :--- | :--- | :--- |
 | Beacon frequency ok | 设备不能使用这个频率，保持之前的信标频率 | 信标频率已更改 |
 
-# 14.3 PingSlotChannelReq
+## 14.3 PingSlotChannelReq
 
 该命令由服务器发送到终端设备，以修改终端设备期望下行链路ping的频率和/或数据速率。
 
@@ -111,17 +113,7 @@ DR字节包含以下字段：
 
 如果这两个比特中的任何一个等于0，则该命令不成功，并且ping时隙参数未被修改。
 
-# 14.4 BeaconTimingReq和BeaconTimingAns
+## 14.4 BeaconTimingReq和BeaconTimingAns
 
 这些MAC命令在LoRaWAN1.1版本中已弃用。该设备可以使用DeviceTimeReq＆Ans命令作为替代。
-
-
-
-
-
-
-
-
-
-
 

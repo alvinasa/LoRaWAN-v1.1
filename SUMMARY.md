@@ -1,7 +1,7 @@
-# Summary
+# Table of contents
 
 * [1 介绍](README.md)
-* [2 LoRaWAN选项介绍](chapter1.md)
+* [2 LoRaWAN选项介绍](introduction-on-lorawan-options.md)
 * [Class A - 所有终端设备](class-a-suo-you-zhong-duan-she-bei.md)
 * [3 物理消息格式](wu-li-xiao-xi-ge-shi.md)
 * [4 MAC消息格式](macxiao-xi-ge-shi.md)
@@ -23,7 +23,7 @@
 * [18 C类MAC命令](18-clei-mac-ming-ling.md)
 * [支持信息](zhi-chi-xin-xi.md)
 * [19 示例和应用信息](19-shi-li-he-ying-yong-xin-xi.md)
-* [20 关于在供应时由终端设备提供商向网络服务器提供约定的建议](20-guan-yu-zai-gong-ying-shi-you-zhong-duan-she-bei-ti-gong-shang-xiang-wang-luo-fu-wu-qi-ti-gong-he-tong-de-jian-yi.md)
+* [20 关于在供应时由终端设备提供商向网络服务器提供约定的建议](20-guan-yu-zai-gong-ying-shi-you-zhong-duan-she-bei-ti-gong-shang-xiang-wang-luo-fu-wu-qi-ti-gong-he.md)
 * [21 有关查找本地使用信道的建议](21-you-guan-cha-zhao-ben-di-shi-yong-pin-dao-de-jian-yi.md)
 * [22 版本](22-xiu-ding.md)
 * [23 词汇表](23-ci-hui-biao.md)
